@@ -11,33 +11,54 @@ const initialCenter = {
 
 export const MapPage = () => {
 
-  const { coords, setRef, newMarker$, movementMarker$ } = useMapbox(initialCenter);
+  const { coords, setRef, newMarker$, movementMarker$, addMarker, updatePositionMarker } = useMapbox(initialCenter);
   const { socket } = useContext(SocketContext);
+
+  // Escuchar los marcadores existentes
+  useEffect(() => {
+    socket.on("markers-active", (markers) => {
+
+      for (const key of Object.keys(markers)) {
+
+        addMarker(markers[key], key);
+      }
+    });
+
+  }, [socket, addMarker]);
 
   useEffect(() => {
     newMarker$.subscribe((marker) => {
-      // TODO: Nuevo marcador emitir
+
       socket.emit("marker-new", marker);
     });
   }, [newMarker$, socket]);
 
-  // Escuchar nuevos marcadores
+  useEffect(() => {
+    movementMarker$.subscribe((marker) => {
+      socket.emit("marker-update", marker);
+    });
+
+  }, [movementMarker$, socket]);
+
+  useEffect(() => {
+
+    socket.on("marker-update", (marker) => {
+
+      updatePositionMarker(marker);
+
+    });
+  }, [socket, updatePositionMarker])
+
+
 
   useEffect(() => {
     socket.on("marker-new", (marker) => {
-      console.log(marker);
+
+      addMarker(marker, marker.id);
     });
-  }, [socket]);
+  }, [socket, addMarker]);
 
 
-  useEffect(() => {
-    movementMarker$.subscribe((marker) => {
-      // TODO: Nuevo marcador emitir
-      // console.log(marker);
-
-    });
-
-  }, [movementMarker$]);
 
 
 
