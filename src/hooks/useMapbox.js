@@ -35,7 +35,7 @@ export const useMapbox = (initialCenter) => {
       .addTo(mapa.current)
       .setDraggable(true);
     marker.id = id ?? v4();
-    markers.current[marker.id] = marker.id;
+    markers.current[marker.id] = marker;
 
     if (!id) {
 
